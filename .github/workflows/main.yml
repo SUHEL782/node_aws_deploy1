@@ -2,31 +2,40 @@ name: Node.js CI/CD
 
 on:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
 
 jobs:
   build:
-
     runs-on: self-hosted
-
+    
     strategy:
       matrix:
-        node-version: [22.18.0] 
-        # Define the Node.js version you want to use
+        node-version: [22.18.0] # Specify the Node.js version you want to test
 
     steps:
-    - uses: actions/checkout@v3
-    
-    - name: Set up Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
-      with:
-        node-version: ${{ matrix.node-version }}
-        cache: 'npm'
+      # Step to check out the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-    - run: npm ci
-    
-    - run: npm run build --if-present
-    
-    - run: pm2 restart apiserver
+      # Step to set up Node.js version and cache npm dependencies
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      # Step to install dependencies using npm ci (clean install)
+      - name: Install dependencies
+        run: npm ci
+
+      # Step to run build script (if present)
+      - name: Build project
+        run: npm run build --if-present
+
+      # Step to restart the server using pm2
+      - name: Restart PM2 server
+        run: pm2 restart apiserver
